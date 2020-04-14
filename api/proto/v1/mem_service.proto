@@ -1,0 +1,92 @@
+syntax = "proto3";
+package v1;
+
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+
+
+//entry
+message Mem {
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
+
+}
+
+message MemInfo {
+    Mem mem= 1;
+    google.protobuf.Timestamp created_at = 2;
+    google.protobuf.Timestamp updated_at = 3;
+}
+
+//new entry
+message NewMemRequest {
+    string title = 1;
+    string description = 2;
+}
+message NewMemResponse {
+    int64 id = 1 ;
+}
+
+//get entries
+message GetMemsRequest {
+}
+message GetMemsResponse {
+    repeated MemInfo mems = 1;
+}
+
+
+//update entry
+message UpdateMemRequest {
+   Mem mem = 1;
+}
+message UpdateMemResponse {
+}
+
+//get entry
+message GetMemRequest {
+    int64 id=1;
+}
+message GetMemResponse {
+    MemInfo mem = 1;
+}
+
+//services
+service MemService {
+
+    //create a new mem
+    rpc NewMem(NewMemRequest) returns (NewMemResponse){
+        option (google.api.http) = {
+            post: "/v1/mems"
+            body: "*"
+        };
+    }
+
+    //Get all mems
+    rpc GetMems(GetMemsRequest) returns (GetMemsResponse){
+        option (google.api.http) = {
+            get: "/v1/mems"
+        };
+    }
+
+    //update mem
+    rpc UpdateMem(UpdateMemRequest) returns (UpdateMemResponse){
+        option (google.api.http) = {
+            put: "/v1/mems/{mem.id}"
+            body: "*"
+        };
+    }
+
+
+    rpc GetMem(GetMemRequest) returns (GetMemResponse){
+        option (google.api.http) = {
+            get: "/v1/mems/{id}"
+        };
+    }
+}
+
+
+
