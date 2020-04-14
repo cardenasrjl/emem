@@ -11,13 +11,9 @@ message Mem {
     int64 id = 1;
     string title = 2;
     string description = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp updated_at = 5;
 
-}
-
-message MemInfo {
-    Mem mem= 1;
-    google.protobuf.Timestamp created_at = 2;
-    google.protobuf.Timestamp updated_at = 3;
 }
 
 //new entry
@@ -33,13 +29,15 @@ message NewMemResponse {
 message GetMemsRequest {
 }
 message GetMemsResponse {
-    repeated MemInfo mems = 1;
+    repeated Mem mems = 1;
 }
 
 
 //update entry
 message UpdateMemRequest {
-   Mem mem = 1;
+    int64 id = 1;
+    string title = 2;
+    string description = 3;
 }
 message UpdateMemResponse {
 }
@@ -49,13 +47,19 @@ message GetMemRequest {
     int64 id=1;
 }
 message GetMemResponse {
-    MemInfo mem = 1;
+    Mem mem = 1;
+}
+
+//delete entry
+message DeleteMemRequest {
+    int64 id=1;
+}
+message DeleteMemResponse {
 }
 
 //services
 service MemService {
-
-    //create a new mem
+    //creates a new mem
     rpc NewMem(NewMemRequest) returns (NewMemResponse){
         option (google.api.http) = {
             post: "/v1/mems"
@@ -70,18 +74,25 @@ service MemService {
         };
     }
 
-    //update mem
+    //updates a particular mem
     rpc UpdateMem(UpdateMemRequest) returns (UpdateMemResponse){
         option (google.api.http) = {
-            put: "/v1/mems/{mem.id}"
+            put: "/v1/mems/{id}"
             body: "*"
         };
     }
 
-
+    //gets a particular mem
     rpc GetMem(GetMemRequest) returns (GetMemResponse){
         option (google.api.http) = {
             get: "/v1/mems/{id}"
+        };
+    }
+
+    //deletes a particular mem
+    rpc DeleteMem(DeleteMemRequest) returns (DeleteMemResponse){
+        option (google.api.http) = {
+            delete: "/v1/mems/{id}"
         };
     }
 }

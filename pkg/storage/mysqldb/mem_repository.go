@@ -3,15 +3,14 @@ package mysqldb
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
+	"time"
 
 	v1 "github.com/cardenasrjl/emem/pkg/api/v1"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-
-
 
 //CreateTodo ...
 func (db *DB) CreateMem(ctx context.Context, m *v1.NewMemRequest) (id int64, err error) {
@@ -42,7 +41,7 @@ func (db *DB) CreateMem(ctx context.Context, m *v1.NewMemRequest) (id int64, err
 
 
 //GetMem ...
-func (db *DB) GetMem(ctx context.Context, id int64) (m *v1.MemInfo, err error) {
+func (db *DB) GetMem(ctx context.Context, id int64) (m *v1.Mem, err error) {
 	// get SQL connection from pool
 	c, err := db.Connect(ctx)
 	if err != nil {
@@ -66,27 +65,30 @@ func (db *DB) GetMem(ctx context.Context, id int64) (m *v1.MemInfo, err error) {
 			id))
 	}
 
-	m = &v1.MemInfo{}
-	if err := rows.Scan(&m.Mem.Id, &m.Mem.Title, &m.Mem.Description, &m.CreatedAt, &m.UpdatedAt); err != nil {
+	m = &v1.Mem{}
+
+	var createdAt time.Time
+	var updatedAt time.Time
+	
+	if err := rows.Scan(&m.Id, &m.Title, &m.Description, &createdAt, &updatedAt); err != nil {
 		return nil, status.Error(codes.Unknown, "failed to retrieve field values from mem row-> "+err.Error())
 	}
 
-	//m.Reminder, err = ptypes.TimestampProto(reminder)
-	//if err != nil {
-		//return nil, status.Error(codes.Unknown, "reminder field has invalid format-> "+err.Error())
-	//}
+	m.CreatedAt, err = ptypes.TimestampProto(createdAt)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "created at field has invalid format-> "+err.Error())
+	}
 
-	//if rows.Next() {
-	//	return nil, status.Error(codes.Unknown, fmt.Sprintf("found multiple ToDo rows with ID='%d'",
-	//		id))
-	//}
-
+	m.UpdatedAt, err = ptypes.TimestampProto(updatedAt)
+	if err != nil {
+		return nil, status.Error(codes.Unknown, "updated at field has invalid format-> "+err.Error())
+	}
+	
 	return
-
 }
 
 //UpdateTodo ...
-func (db *DB) UpdateMem(ctx context.Context, m *v1.Mem) ( err error) {
+func (db *DB) UpdateMem(ctx context.Context, m *v1.UpdateMemRequest) ( err error) {
 	// get SQL connection from pool
 	c, err := db.Connect(ctx)
 	if err != nil {
@@ -106,7 +108,7 @@ func (db *DB) UpdateMem(ctx context.Context, m *v1.Mem) ( err error) {
 }
 
 //GetMems ...`
-func (db *DB) GetMems(ctx context.Context) (list []*v1.MemInfo, err error) {
+func (db *DB) GetMems(ctx context.Context) (list []*v1.Mem, err error) {
 	// get SQL connection from pool
 	c, err := db.Connect(ctx)
 	if err != nil {
@@ -121,12 +123,24 @@ func (db *DB) GetMems(ctx context.Context) (list []*v1.MemInfo, err error) {
 	}
 	defer rows.Close()
 	
-	list = []*v1.MemInfo{}
+	list = []*v1.Mem{}
 	for rows.Next() {
-		m := new(v1.MemInfo)
-		m.Mem = new(v1.Mem)
-		if err := rows.Scan(&m.Mem.Id, &m.Mem.Title, &m.Mem.Description, &m.CreatedAt, &m.UpdatedAt); err != nil {
+		m := new(v1.Mem)
+		// get data
+		var createdAt time.Time
+		var updatedAt time.Time
+		if err := rows.Scan(&m.Id, &m.Title, &m.Description, &createdAt, &updatedAt); err != nil {
 			return nil, status.Error(codes.Unknown, "failed to retrieve field values from mem row-> "+err.Error())
+		}
+		
+		m.CreatedAt, err = ptypes.TimestampProto(createdAt)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, "created at field has invalid format-> "+err.Error())
+		}
+
+		m.UpdatedAt, err = ptypes.TimestampProto(updatedAt)
+		if err != nil {
+			return nil, status.Error(codes.Unknown, "updated at field has invalid format-> "+err.Error())
 		}
 		
 		list = append(list, m)
@@ -135,5 +149,33 @@ func (db *DB) GetMems(ctx context.Context) (list []*v1.MemInfo, err error) {
 	if err := rows.Err(); err != nil {
 		return nil, status.Error(codes.Unknown, "failed to retrieve data from mem-> "+err.Error())
 	}
+	return
+}
+
+//delete todo
+func (db *DB) DeleteMem(ctx context.Context, id int64) (err error) {
+	// get SQL connection from pool
+	c, err := db.Connect(ctx)
+	if err != nil {
+		return
+	}
+	defer c.Close()
+
+	// delete todo
+	res, err := c.ExecContext(ctx, "DELETE FROM `mems` WHERE `id`=?", id)
+	if err != nil {
+		return status.Error(codes.Unknown, "failed to delete ToDo-> "+err.Error())
+	}
+
+	 rows, err := res.RowsAffected()
+	if err != nil {
+		return  status.Error(codes.Unknown, "failed to retrieve rows affected value-> "+err.Error())
+	}
+
+	if rows == 0 {
+		return  status.Error(codes.NotFound, fmt.Sprintf("ToDo with ID='%d' is not found",
+			id))
+	}
+
 	return
 }

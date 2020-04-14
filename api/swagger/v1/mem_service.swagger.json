@@ -34,7 +34,7 @@
         ]
       },
       "post": {
-        "summary": "create a new mem",
+        "summary": "creates a new mem",
         "operationId": "NewMem",
         "responses": {
           "200": {
@@ -67,6 +67,7 @@
     },
     "/v1/mems/{id}": {
       "get": {
+        "summary": "gets a particular mem",
         "operationId": "GetMem",
         "responses": {
           "200": {
@@ -94,11 +95,39 @@
         "tags": [
           "MemService"
         ]
-      }
-    },
-    "/v1/mems/{mem.id}": {
+      },
+      "delete": {
+        "summary": "deletes a particular mem",
+        "operationId": "DeleteMem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteMemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "MemService"
+        ]
+      },
       "put": {
-        "summary": "update mem",
+        "summary": "updates a particular mem",
         "operationId": "UpdateMem",
         "responses": {
           "200": {
@@ -116,7 +145,7 @@
         },
         "parameters": [
           {
-            "name": "mem.id",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
@@ -174,11 +203,14 @@
         }
       }
     },
+    "v1DeleteMemResponse": {
+      "type": "object"
+    },
     "v1GetMemResponse": {
       "type": "object",
       "properties": {
         "mem": {
-          "$ref": "#/definitions/v1MemInfo"
+          "$ref": "#/definitions/v1Mem"
         }
       }
     },
@@ -188,7 +220,7 @@
         "mems": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/v1MemInfo"
+            "$ref": "#/definitions/v1Mem"
           }
         }
       }
@@ -205,15 +237,6 @@
         },
         "description": {
           "type": "string"
-        }
-      },
-      "title": "entry"
-    },
-    "v1MemInfo": {
-      "type": "object",
-      "properties": {
-        "mem": {
-          "$ref": "#/definitions/v1Mem"
         },
         "created_at": {
           "type": "string",
@@ -223,7 +246,8 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "title": "entry"
     },
     "v1NewMemRequest": {
       "type": "object",
@@ -249,8 +273,15 @@
     "v1UpdateMemRequest": {
       "type": "object",
       "properties": {
-        "mem": {
-          "$ref": "#/definitions/v1Mem"
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
         }
       },
       "title": "update entry"

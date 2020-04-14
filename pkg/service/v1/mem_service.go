@@ -3,39 +3,32 @@ package v1
 import (
 	"context"
 	"database/sql"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	redis2 "github.com/go-redis/redis/v7"
-
-	"github.com/cardenasrjl/emem/pkg/storage/redis"
 
 	v1 "github.com/cardenasrjl/emem/pkg/api/v1"
 	"github.com/cardenasrjl/emem/pkg/storage/mysqldb"
 )
 
-
 // MemServiceServer is implementation of v1.ToDoServiceServer proto interface
 type memServiceServer struct {
 	database *mysqldb.DB
-	redis    *redis.RdsClient
 }
 
 // NewMemServiceServer ...
-func NewMemServiceServer(db *sql.DB, rd *redis2.Client) v1.MemServiceServer {
+func NewMemServiceServer(db *sql.DB) v1.MemServiceServer {
 	st := mysqldb.NewDB(db)
-	rdsClient := redis.NewClient(rd)
-	return &memServiceServer{database: st, redis: rdsClient}
+	return &memServiceServer{database: st}
 }
 
 //validateMem validates if the request to create a mem is valid
-func validateMem( m *v1.NewMemRequest) error {
+func validateMem(m *v1.NewMemRequest) error {
 	if m.Title == "" || m.Description == "" {
-		return  status.Error(codes.Unknown, "missing title or description ")
+		return status.Error(codes.Unknown, "missing title or description ")
 	}
 	return nil
 }
-
 
 // CreateMem
 func (s *memServiceServer) NewMem(ctx context.Context, req *v1.NewMemRequest) (*v1.NewMemResponse, error) {
@@ -51,30 +44,21 @@ func (s *memServiceServer) NewMem(ctx context.Context, req *v1.NewMemRequest) (*
 	}
 
 	return &v1.NewMemResponse{
-		Id:  id,
+		Id: id,
 	}, nil
 }
 
 // GetMem
 func (s *memServiceServer) GetMem(ctx context.Context, req *v1.GetMemRequest) (resp *v1.GetMemResponse, err error) {
-	m := &v1.MemInfo{}
-	found := s.redis.Get(s.redis.Key(req.Id), m)
-	if !found {
+	m := &v1.Mem{}
 
-		m, err := s.database.GetMem(ctx, req.Id)
-		if err != nil {
-			return nil, err
-		}
-
-		//save for next time
-		err = s.redis.Set(s.redis.Key(req.Id), m)
-		if err != nil {
-			return nil, err
-		}
+	m, err = s.database.GetMem(ctx, req.Id)
+	if err != nil {
+		return nil, err
 	}
 
 	resp = &v1.GetMemResponse{
-		Mem: m ,
+		Mem: m,
 	}
 
 	return
@@ -84,26 +68,17 @@ func (s *memServiceServer) GetMem(ctx context.Context, req *v1.GetMemRequest) (r
 // UpdateMem
 func (s *memServiceServer) UpdateMem(ctx context.Context, req *v1.UpdateMemRequest) (*v1.UpdateMemResponse, error) {
 	//update the resourse
-	err := s.database.UpdateMem(ctx, req.Mem)
+	err := s.database.UpdateMem(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	//remove from cache
-	err = s.redis.Del(s.redis.Key(req.Mem.Id))
-	if err != nil {
-		return nil, err
-	}
-	
 	//create the response
-	return &v1.UpdateMemResponse{
-	}, nil
+	return &v1.UpdateMemResponse{}, nil
 }
 
-// Delete todo task
-func (s *memServiceServer) DeleteMem(ctx context.Context, req *v1.DeleteRequest) (*v1.DeleteResponse, error) {
-
-
+//DeleteMem Deletes a mem entry
+func (s *memServiceServer) DeleteMem(ctx context.Context, req *v1.DeleteMemRequest) (*v1.DeleteMemResponse, error) {
 	// get SQL connection from pool
 	c, err := s.database.Connect(ctx)
 	if err != nil {
@@ -111,26 +86,17 @@ func (s *memServiceServer) DeleteMem(ctx context.Context, req *v1.DeleteRequest)
 	}
 	defer c.Close()
 
-	rows, err := s.database.DeleteTodo(ctx, req.Id)
+	err = s.database.DeleteMem(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	//remove from cache
-	err = s.redis.Del(s.redis.Key(req.Id))
-	if err != nil {
-		return nil, err
-	}
-
-	return &v1.DeleteResponse{
-		Api:     apiVersion,
-		Deleted: rows,
-	}, nil
+	return &v1.DeleteMemResponse{}, nil
 }
 
-// GetMems
+// GetMems gets all mem
 func (s *memServiceServer) GetMems(ctx context.Context, req *v1.GetMemsRequest) (*v1.GetMemsResponse, error) {
-	
+
 	//get data from database
 	mems, err := s.database.GetMems(ctx)
 	if err != nil {
@@ -139,6 +105,6 @@ func (s *memServiceServer) GetMems(ctx context.Context, req *v1.GetMemsRequest) 
 
 	//return the response
 	return &v1.GetMemsResponse{
-	Mems: mems,
+		Mems: mems,
 	}, nil
 }
