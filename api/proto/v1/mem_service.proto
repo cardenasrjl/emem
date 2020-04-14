@@ -6,8 +6,6 @@ import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-swagger/options/annotations.proto";
 
-
-
 //entry
 message Mem {
     int64 id = 1;
