@@ -1,16 +1,23 @@
-FROM golang:1.13 as builder
+FROM golang:1.13
 
-RUN mkdir /build
-ADD . /build
-WORKDIR /build
-
-RUN go build -v -o emem cmd/server/main.go
-
-
-COPY --from=builder /build/emem /app/emem
-
-RUN chmod +x /app/emem
+RUN apt-get -y update \
+    && apt-get -y upgrade \
+    && apt-get install -y git bash gnupg2 ca-certificates vim curl tzdata make default-mysql-client
 
 WORKDIR /app
 
-CMD /app/emem
+# Enables go modules inside GOPATH
+ENV GO111MODULE=on
+
+# Copy go modules
+COPY go.mod go.sum ./
+
+# Install dependecies.
+RUN go mod download
+
+COPY . ./
+
+# RUN make build
+RUN go build -v -o emem cmd/server/main.go
+
+CMD ["/app/emem"]

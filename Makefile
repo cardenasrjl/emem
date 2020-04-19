@@ -4,14 +4,15 @@ proto:
 build: proto
 	go build -o server cmd/server/main.go
 
-build_client:
+docker: proto 
+	docker build  -t cardenasrjl/emem:latest .
 
+build_client:
 	go build -o client cmd/client-grpc/main.go
 
 up: build
 	docker-compose up -d
-	./server
-
+	
 down:
 	docker-compose down
 

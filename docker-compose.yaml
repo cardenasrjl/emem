@@ -16,7 +16,7 @@ services:
     ports:
       - 6379:6379
   app:
-    image: cardenasrjl/emem:tagname
+    image: cardenasrjl/emem:latest
     ports:
       - "8080:8080"
       - "8082:8082"
