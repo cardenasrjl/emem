@@ -22,16 +22,12 @@ func main() {
 	var body string
 
 	// Call Create
-	resp, err := http.Post(*address+"/v1/todo", "application/json", strings.NewReader(fmt.Sprintf(`
+	resp, err := http.Post(*address+"/v1/mems", "application/json", strings.NewReader(`
 		{
-			"api":"v1",
-			"toDo": {
-				"title":"title (%s)",
-				"description":"description (%s)",
-				"reminder":"%s"
-			}
+			"title":"Homework",
+			"description":"tidays i want to save this."
 		}
-	`, pfx, pfx, pfx)))
+	`))
 	if err != nil {
 		log.Fatalf("failed to call Create method: %v", err)
 	}
@@ -96,7 +92,7 @@ func main() {
 	log.Printf("Update response: Code=%d, Body=%s\n\n", resp.StatusCode, body)
 
 	// Call ReadAll
-	resp, err = http.Get(*address + "/v1/todo/all")
+	resp, err = http.Get(*address + "/v1/mems")
 	if err != nil {
 		log.Fatalf("failed to call ReadAll method: %v", err)
 	}
