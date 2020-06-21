@@ -17,3 +17,8 @@ down:
 	docker-compose down
 
 restart: down up 
+
+clean-up: down  
+	docker system prune -f
+	make docker
+	make up
