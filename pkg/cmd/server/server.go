@@ -55,10 +55,10 @@ func RunServer() error {
 	var cfg Config
 	flag.StringVar(&cfg.GRPCPort, "grpc-port", "8081", "gRPC port to bind")
 	flag.StringVar(&cfg.HTTPPort, "http-port", "8080", "HTTP port to bind")
-	flag.StringVar(&cfg.DatastoreDBHost, "db-host", "mysql", "Database host")
-	flag.StringVar(&cfg.DatastoreDBUser, "db-user", "root", "Database user")
-	flag.StringVar(&cfg.DatastoreDBPassword, "db-password", "root", "Database password")
-	flag.StringVar(&cfg.DatastoreDBSchema, "db-schema", "emem", "Database schema")
+	flag.StringVar(&cfg.DatastoreDBHost, "db-host", "107.180.2.232", "Database host")
+	flag.StringVar(&cfg.DatastoreDBUser, "db-user", "emem_user", "Database user")
+	flag.StringVar(&cfg.DatastoreDBPassword, "db-password", "Ekl1?c.w${_Z", "Database password")
+	flag.StringVar(&cfg.DatastoreDBSchema, "db-schema", "emem_db", "Database schema")
 	flag.IntVar(&cfg.LogLevel, "log-level", -1, "Global log level")
 	flag.StringVar(&cfg.LogTimeFormat, "log-time-format", "2006-01-02T15:04:05Z07:00",
 		"Print time format for logger e.g. 2006-01-02T15:04:05Z07:00")
