@@ -115,7 +115,7 @@ func (db *DB) GetMems(ctx context.Context) (list []*v1.Mem, err error) {
 	}
 	defer c.Close()
 
-	// get ToDo list
+	// get mems
 	rows, err := c.QueryContext(ctx, "SELECT `id`, `title`, `description`, `created_at`, `updated_at` FROM mems order by id desc")
 	if err != nil {
 		return nil, status.Error(codes.Unknown, "failed to select from ToDo-> "+err.Error())
@@ -152,7 +152,7 @@ func (db *DB) GetMems(ctx context.Context) (list []*v1.Mem, err error) {
 	return
 }
 
-//delete todo
+//delete
 func (db *DB) DeleteMem(ctx context.Context, id int64) (err error) {
 	// get SQL connection from pool
 	c, err := db.Connect(ctx)

@@ -9,18 +9,17 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/cardenasrjl/emem/pkg/api/v1"
+	v1 "github.com/cardenasrjl/emem/pkg/api/v1"
 	"github.com/cardenasrjl/emem/pkg/logger"
 	"github.com/cardenasrjl/emem/pkg/protocol/grpc/middleware"
 )
 
 // RunServer runs gRPC service to publish mem
-func RunServer(ctx context.Context, v1API v1.MemServiceServer, port string) error {
+func RunServer(ctx context.Context, v1API v1.MemServiceServer, v1VAPI v1.VolumeServiceServer, port string) error {
 	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
 	}
-
 
 	// gRPC server statup options
 	opts := []grpc.ServerOption{}
@@ -28,10 +27,10 @@ func RunServer(ctx context.Context, v1API v1.MemServiceServer, port string) erro
 	// add middleware
 	opts = middleware.AddLogging(logger.Log, opts)
 
-
 	// register service
 	server := grpc.NewServer(opts...)
 	v1.RegisterMemServiceServer(server, v1API)
+	v1.RegisterVolumeServiceServer(server, v1VAPI)
 
 	// graceful shutdown
 	c := make(chan os.Signal, 1)

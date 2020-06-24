@@ -93,12 +93,16 @@ func RunServer() error {
 	}
 	defer db.Close()
 
-	v1API := v1.NewMemServiceServer(db)
+	//mems service
+	v1API := v1.NewMemService(db)
+	//volume service
+	v1VAPI := v1.NeVolumeService(db)
 
 	// run HTTP gateway
 	go func() {
 		_ = rest.RunServer(ctx, cfg.GRPCPort, cfg.HTTPPort)
 	}()
 
-	return grpc.RunServer(ctx, v1API, cfg.GRPCPort)
+	return grpc.RunServer(ctx, v1API, v1VAPI, cfg.GRPCPort)
+
 }

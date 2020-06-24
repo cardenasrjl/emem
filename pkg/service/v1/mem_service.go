@@ -12,14 +12,19 @@ import (
 )
 
 // MemServiceServer is implementation of v1.ToDoServiceServer proto interface
-type memServiceServer struct {
+type memService struct {
 	database *mysqldb.DB
 }
 
 // NewMemServiceServer ...
-func NewMemServiceServer(db *sql.DB) v1.MemServiceServer {
+func NewMemService(db *sql.DB) v1.MemServiceServer {
 	st := mysqldb.NewDB(db)
-	return &memServiceServer{database: st}
+	return &memService{database: st}
+}
+
+//Get Volume Mems
+func (s *memService) GetVolumeMems(context.Context, *v1.GetVolumeMemsRequest) (*v1.GetVolumeMemsResponse, error) {
+	panic("implement me")
 }
 
 //validateMem validates if the request to create a mem is valid
@@ -31,7 +36,7 @@ func validateMem(m *v1.NewMemRequest) error {
 }
 
 // CreateMem
-func (s *memServiceServer) NewMem(ctx context.Context, req *v1.NewMemRequest) (*v1.NewMemResponse, error) {
+func (s *memService) NewMem(ctx context.Context, req *v1.NewMemRequest) (*v1.NewMemResponse, error) {
 	//validates the entry
 	err := validateMem(req)
 	if err != nil {
@@ -49,7 +54,7 @@ func (s *memServiceServer) NewMem(ctx context.Context, req *v1.NewMemRequest) (*
 }
 
 // GetMem
-func (s *memServiceServer) GetMem(ctx context.Context, req *v1.GetMemRequest) (resp *v1.GetMemResponse, err error) {
+func (s *memService) GetMem(ctx context.Context, req *v1.GetMemRequest) (resp *v1.GetMemResponse, err error) {
 	m := &v1.Mem{}
 
 	m, err = s.database.GetMem(ctx, req.Id)
@@ -60,13 +65,11 @@ func (s *memServiceServer) GetMem(ctx context.Context, req *v1.GetMemRequest) (r
 	resp = &v1.GetMemResponse{
 		Mem: m,
 	}
-
 	return
-
 }
 
 // UpdateMem
-func (s *memServiceServer) UpdateMem(ctx context.Context, req *v1.UpdateMemRequest) (*v1.UpdateMemResponse, error) {
+func (s *memService) UpdateMem(ctx context.Context, req *v1.UpdateMemRequest) (*v1.UpdateMemResponse, error) {
 	//update the resourse
 	err := s.database.UpdateMem(ctx, req)
 	if err != nil {
@@ -78,7 +81,7 @@ func (s *memServiceServer) UpdateMem(ctx context.Context, req *v1.UpdateMemReque
 }
 
 //DeleteMem Deletes a mem entry
-func (s *memServiceServer) DeleteMem(ctx context.Context, req *v1.DeleteMemRequest) (*v1.DeleteMemResponse, error) {
+func (s *memService) DeleteMem(ctx context.Context, req *v1.DeleteMemRequest) (*v1.DeleteMemResponse, error) {
 	// get SQL connection from pool
 	c, err := s.database.Connect(ctx)
 	if err != nil {
@@ -95,7 +98,7 @@ func (s *memServiceServer) DeleteMem(ctx context.Context, req *v1.DeleteMemReque
 }
 
 // GetMems gets all mem
-func (s *memServiceServer) GetMems(ctx context.Context, req *v1.GetMemsRequest) (*v1.GetMemsResponse, error) {
+func (s *memService) GetMems(ctx context.Context, req *v1.GetMemsRequest) (*v1.GetMemsResponse, error) {
 
 	//get data from database
 	mems, err := s.database.GetMems(ctx)

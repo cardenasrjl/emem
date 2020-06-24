@@ -164,6 +164,38 @@
           "MemService"
         ]
       }
+    },
+    "/v1/volumes/{volume_id}/mems": {
+      "get": {
+        "summary": "Get all per volumne",
+        "operationId": "GetVolumeMems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetVolumeMemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "volume_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "MemService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -225,10 +257,29 @@
         }
       }
     },
+    "v1GetVolumeMemsResponse": {
+      "type": "object",
+      "properties": {
+        "mems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Mem"
+          }
+        }
+      }
+    },
     "v1Mem": {
       "type": "object",
       "properties": {
         "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "volume_id": {
           "type": "string",
           "format": "int64"
         },
@@ -257,6 +308,10 @@
         },
         "description": {
           "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "int64"
         }
       },
       "title": "new entry"

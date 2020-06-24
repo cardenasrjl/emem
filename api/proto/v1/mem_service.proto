@@ -9,10 +9,12 @@ import "protoc-gen-swagger/options/annotations.proto";
 //entry
 message Mem {
     int64 id = 1;
-    string title = 2;
-    string description = 3;
-    google.protobuf.Timestamp created_at = 4;
-    google.protobuf.Timestamp updated_at = 5;
+    int64 user_id = 2;
+    int64 volume_id = 3;
+    string title = 4;
+    string description = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
 
 }
 
@@ -20,6 +22,7 @@ message Mem {
 message NewMemRequest {
     string title = 1;
     string description = 2;
+    int64 user_id = 3;
 }
 message NewMemResponse {
     int64 id = 1 ;
@@ -55,6 +58,14 @@ message DeleteMemRequest {
     int64 id=1;
 }
 message DeleteMemResponse {
+}
+
+//get mems per volume
+message GetVolumeMemsRequest {
+    int64 volume_id = 1;
+}
+message GetVolumeMemsResponse {
+    repeated Mem mems = 1;
 }
 
 //services
@@ -93,6 +104,13 @@ service MemService {
     rpc DeleteMem(DeleteMemRequest) returns (DeleteMemResponse){
         option (google.api.http) = {
             delete: "/v1/mems/{id}"
+        };
+    }
+
+    //Get all per volumne
+    rpc GetVolumeMems(GetVolumeMemsRequest) returns (GetVolumeMemsResponse){
+        option (google.api.http) = {
+            get: "/v1/volumes/{volume_id}/mems"
         };
     }
 }
