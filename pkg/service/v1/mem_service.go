@@ -16,13 +16,13 @@ type memService struct {
 	database *mysqldb.DB
 }
 
-// NewMemServiceServer ...
+// NewMemService ...
 func NewMemService(db *sql.DB) v1.MemServiceServer {
 	st := mysqldb.NewDB(db)
 	return &memService{database: st}
 }
 
-//Get Volume Mems
+//GetVolumeMems
 func (s *memService) GetVolumeMems(context.Context, *v1.GetVolumeMemsRequest) (*v1.GetVolumeMemsResponse, error) {
 	panic("implement me")
 }
@@ -35,14 +35,13 @@ func validateMem(m *v1.NewMemRequest) error {
 	return nil
 }
 
-// CreateMem
+// NewMem
 func (s *memService) NewMem(ctx context.Context, req *v1.NewMemRequest) (*v1.NewMemResponse, error) {
-	//validates the entry
 	err := validateMem(req)
 	if err != nil {
 		return nil, err
 	}
-	//create the mem
+
 	id, err := s.database.CreateMem(ctx, req)
 	if err != nil {
 		return nil, err
@@ -53,7 +52,6 @@ func (s *memService) NewMem(ctx context.Context, req *v1.NewMemRequest) (*v1.New
 	}, nil
 }
 
-// GetMem
 func (s *memService) GetMem(ctx context.Context, req *v1.GetMemRequest) (resp *v1.GetMemResponse, err error) {
 	m := &v1.Mem{}
 
@@ -68,21 +66,16 @@ func (s *memService) GetMem(ctx context.Context, req *v1.GetMemRequest) (resp *v
 	return
 }
 
-// UpdateMem
 func (s *memService) UpdateMem(ctx context.Context, req *v1.UpdateMemRequest) (*v1.UpdateMemResponse, error) {
-	//update the resourse
 	err := s.database.UpdateMem(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	//create the response
 	return &v1.UpdateMemResponse{}, nil
 }
 
-//DeleteMem Deletes a mem entry
 func (s *memService) DeleteMem(ctx context.Context, req *v1.DeleteMemRequest) (*v1.DeleteMemResponse, error) {
-	// get SQL connection from pool
 	c, err := s.database.Connect(ctx)
 	if err != nil {
 		return nil, err
@@ -97,16 +90,12 @@ func (s *memService) DeleteMem(ctx context.Context, req *v1.DeleteMemRequest) (*
 	return &v1.DeleteMemResponse{}, nil
 }
 
-// GetMems gets all mem
 func (s *memService) GetMems(ctx context.Context, req *v1.GetMemsRequest) (*v1.GetMemsResponse, error) {
-
-	//get data from database
 	mems, err := s.database.GetMems(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	//return the response
 	return &v1.GetMemsResponse{
 		Mems: mems,
 	}, nil

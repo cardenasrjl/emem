@@ -10,8 +10,10 @@ docker: proto
 build_client:
 	go build -o client cmd/client-grpc/main.go
 
-up: build
-	docker-compose up -d
+
+
+up: build 
+	docker-compose up --build -d
 	
 down:
 	docker-compose down

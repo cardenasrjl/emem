@@ -1,0 +1,82 @@
+syntax = "proto3";
+package v1;
+
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+//entry
+message Volume {
+    int64 id = 1;
+    int64 user_id = 2;
+    string title = 3;
+    string description = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+
+}
+
+//new entry
+message NewVolumeRequest {
+    string user_id = 1;
+    string title = 2;
+    string description = 3;
+}
+message NewVolumeResponse {
+    int64 id = 1 ;
+}
+
+//get volumes
+message GetVolumesRequest {
+    int64 user_id = 1;
+}
+message GetVolumesResponse {
+    repeated Volume volumes = 1;
+}
+
+//get volumes
+message GetVolumeRequest {
+    int64 id = 2;
+    int64 user_id = 1;
+   
+}
+message GetVolumeResponse {
+     Volume volume = 1;
+}
+
+//delete entry
+message DeleteVolumeRequest {
+    int64 id=1;
+}
+message DeleteResponseResponse {
+}
+
+//services
+service VolumeService {
+
+    //Get Volumes
+    rpc GetVolumes(GetVolumesRequest) returns (GetVolumesResponse){
+        option (google.api.http) = {
+            get: "/v1/volumes"
+        };
+    }
+
+
+    //Get Volume
+    rpc GetVolume(GetVolumeRequest) returns (GetVolumeResponse){
+        option (google.api.http) = {
+            get: "/v1/volumes/{id}"
+        };
+    }
+
+    //Delete Volume
+    rpc DeleteVolume(DeleteVolumeRequest) returns (DeleteResponseResponse){
+        option (google.api.http) = {
+            delete: "/v1/volumes/{id}"
+        };
+    }
+}
+
+
+

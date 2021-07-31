@@ -15,15 +15,14 @@ CREATE TABLE `mems` (
 
 create table volumes
 (
-    id bigint(20) auto_increment,
+    `id` bigint(20) NOT NULL AUTO_INCREMENT,
     user_id bigint(20) not null,
     title VARCHAR(50) null,
     created_at TIMESTAMP default current_timestamp not null,
-    updated_at TIMESTAMP default current_timestamp not null
+    updated_at TIMESTAMP default current_timestamp not null,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `ID_UNIQUE` (`id`)
 );
-
-create unique index volumes_id_uindex
-    on volumes (id);
 
 create unique index _mem_id_volume_uindex
     on volumes (user_id, title);
@@ -34,6 +33,8 @@ create table users
     username VARCHAR(255) not null,
     password VARCHAR(255) null,
     created_at TIMESTAMP default current_timestamp not null,
-    updated_at TIMESTAMP not null on UPDATE current_timestamp
+    updated_at TIMESTAMP not null on UPDATE current_timestamp,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `ID_UNIQUE` (`id`)
 );
 

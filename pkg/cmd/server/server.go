@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/cardenasrjl/emem/pkg/config"
+
 	// mysql driver
 
 	_ "github.com/go-sql-driver/mysql"
@@ -51,15 +53,22 @@ type Config struct {
 func RunServer() error {
 	ctx := context.Background()
 
+	envConfig, err := config.New()
+	if err != nil {
+		return err
+	}
+
 	// get configuration
 	var cfg Config
-	flag.StringVar(&cfg.GRPCPort, "grpc-port", "8081", "gRPC port to bind")
-	flag.StringVar(&cfg.HTTPPort, "http-port", "8080", "HTTP port to bind")
-	flag.StringVar(&cfg.DatastoreDBHost, "db-host", "107.180.2.232", "Database host")
-	flag.StringVar(&cfg.DatastoreDBUser, "db-user", "emem_user", "Database user")
-	flag.StringVar(&cfg.DatastoreDBPassword, "db-password", "Ekl1?c.w${_Z", "Database password")
-	flag.StringVar(&cfg.DatastoreDBSchema, "db-schema", "emem_db", "Database schema")
-	flag.IntVar(&cfg.LogLevel, "log-level", -1, "Global log level")
+	flag.StringVar(&cfg.GRPCPort, "grpc-port", envConfig.GrpcPort, "gRPC port to bind")
+	flag.StringVar(&cfg.HTTPPort, "http-port", envConfig.HttpPort, "HTTP port to bind")
+
+	flag.StringVar(&cfg.DatastoreDBHost, "db-host", envConfig.DatabaseHost, "Database host")
+	flag.StringVar(&cfg.DatastoreDBUser, "db-user", envConfig.DatabaseUser, "Database user")
+	flag.StringVar(&cfg.DatastoreDBPassword, "db-password", envConfig.DatabasePass, "Database password")
+	flag.StringVar(&cfg.DatastoreDBSchema, "db-schema", envConfig.DatabaseSchema, "Database schema")
+
+	flag.IntVar(&cfg.LogLevel, "log-level", envConfig.LogLevel, "Global log level")
 	flag.StringVar(&cfg.LogTimeFormat, "log-time-format", "2006-01-02T15:04:05Z07:00",
 		"Print time format for logger e.g. 2006-01-02T15:04:05Z07:00")
 	flag.Parse()

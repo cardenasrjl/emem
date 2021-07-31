@@ -23,7 +23,10 @@ services:
       - backend
 
   app:
-    image: cardenasrjl/emem:latest
+    build:
+      context: .
+    env_file:
+      - ./.env
     ports:
       - "8080:8080"
     depends_on:
